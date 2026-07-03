@@ -1,0 +1,43 @@
+{
+  "board": {
+    "wifi_connection": true,
+    "stream_buffer_size": 45000
+  },
+  "display": {
+    "fullscreen": true,
+    "user_screen_index": 0,
+    "public_screen_index": 1
+  },
+  "eeg": {
+    "n_visual_channels": 6,
+    "plot_window_sec": 5.0,
+    "score_window_sec": 2.0,
+    "public_update_interval_sec": 0.1
+  },
+  "stages": [
+    {
+      "name": "REST",
+      "title": "REPOSO",
+      "instruction": "Quédate quieto.\nParpadea normal.\nMira al centro.",
+      "duration": 10
+    },
+    {
+      "name": "CALMA",
+      "title": "CALMA / RESPIRACIÓN",
+      "instruction": "Respira lento siguiendo el círculo:\nINHALA 4s — EXHALA 6s",
+      "duration": 12
+    },
+    {
+      "name": "ENFOQUE",
+      "title": "ENFOQUE (STROOP)",
+      "instruction": "Di en voz alta el COLOR del texto,\nNO la palabra.",
+      "duration": 12
+    },
+    {
+      "name": "ESTRES",
+      "title": "RETOS RÁPIDOS",
+      "instruction": "Cuenta hacia atrás:\n100, 93, 86, 79...\n(De 7 en 7) rápido.",
+      "duration": 12
+    }
+  ]
+}

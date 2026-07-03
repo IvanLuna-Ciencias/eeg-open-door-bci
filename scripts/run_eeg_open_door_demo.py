@@ -2,12 +2,19 @@ import time
 import random
 import numpy as np
 
+import json
+from pathlib import Path
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 
 from mindrove.board_shim import BoardShim, MindRoveInputParams, BoardIds
 from mindrove.data_filter import DataFilter
 
+def load_config(config_path: str):
+    path = Path(config_path)
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
 
 # ----------------------------- Utils: simple EEG scores -----------------------------
 def compute_scores_one_channel(x_uV: np.ndarray, srate: int):
@@ -49,33 +56,7 @@ def compute_scores_one_channel(x_uV: np.ndarray, srate: int):
 
 
 # ----------------------------- Stage definitions -----------------------------
-STAGES = [
-    {
-        "name": "REST",
-        "title": "REPOSO",
-        "instruction": "Quédate quieto.\nParpadea normal.\nMira al centro.",
-        "duration": 10
-    },
-    {
-        "name": "CALMA",
-        "title": "CALMA / RESPIRACIÓN",
-        "instruction": "Respira lento siguiendo el círculo:\nINHALA 4s — EXHALA 6s",
-        "duration": 12
-    },
-    {
-        "name": "ENFOQUE",
-        "title": "ENFOQUE (STROOP)",
-        "instruction": "Di en voz alta el COLOR del texto,\nNO la palabra.",
-        "duration": 12
-    },
-    {
-        "name": "ESTRES",
-        "title": "RETOS RÁPIDOS",
-        "instruction": "Cuenta hacia atrás:\n100, 93, 86, 79...\n(De 7 en 7) rápido.",
-        "duration": 12
-    },
-]
-
+STAGES = []
 
 # ----------------------------- User Window (instructions/tests) -----------------------------
 class UserWindow(QtWidgets.QWidget):
@@ -409,7 +390,7 @@ class RocketWidget(QtWidgets.QWidget):
 
 # ----------------------------- Controller: acquisition + windows -----------------------------
 class Controller(QtCore.QObject):
-    def __init__(self, board, board_id, user_win: UserWindow, pub_win: PublicWindow):
+    def __init__(self, board, board_id, user_win: UserWindow, pub_win: PublicWindow, config: dict):
         super().__init__()
         self.board = board
         self.board_id = board_id
@@ -423,10 +404,11 @@ class Controller(QtCore.QObject):
         self.pick_channels = self.eeg_channels[:min(6, len(self.eeg_channels))]
 
         # loop timers
-        self.win_sec = 5.0
+        self.win_sec = config["eeg"]["plot_window_sec"]
         self.win_n = int(self.win_sec * self.srate)
-        self.score_n = int(2.0 * self.srate)
+        self.score_n = int(config["eeg"]["score_window_sec"] * self.srate)
 
+        self.public_update_interval_sec = config["eeg"]["public_update_interval_sec"]
         self._last_pub_update = 0.0
 
         # connect buttons
@@ -469,7 +451,7 @@ class Controller(QtCore.QObject):
 
         # public update at ~10 Hz (para no saturar)
         now = time.time()
-        if now - self._last_pub_update >= 0.1:
+        if now - self._last_pub_update >= self.public_update_interval_sec:
             self._last_pub_update = now
             self.pub_win.update_visuals(stage_name, calm_s, act_s, blink, quality, eeg_mat)
 
@@ -486,6 +468,11 @@ def move_window_to_screen(window: QtWidgets.QWidget, screen: QtGui.QScreen, full
 
 
 def main():
+    config = load_config("configs/demo_eeg.json")
+
+    global STAGES
+    STAGES = config["stages"]
+
     # ------------ Connect MindRove (WiFi default) ------------
     params = MindRoveInputParams()
     params.wifi_connection = True
@@ -508,25 +495,28 @@ def main():
     for i, screen in enumerate(screens):
         print(f"Screen {i}: {screen.name()} | geometry={screen.geometry()}")
 
+    user_idx = config["display"]["user_screen_index"]
+    pub_idx = config["display"]["public_screen_index"]
+
     if len(screens) < 2:
-        print("Only one screen detected. Connect two monitors in Extend mode.")
+        print("⚠️ Only one screen detected. Connect two monitors in Extend mode.")
         user_screen = screens[0]
         pub_screen = screens[0]
     else:
-        # Fixed screen assignment:
-        # - Screen 0: user instructions
-        # - Screen 1: public EEG visualization
-        user_screen = screens[0]
-        pub_screen = screens[1]
+        user_screen = screens[user_idx]
+        pub_screen = screens[pub_idx]
 
     user_win = UserWindow()
-    pub_win = PublicWindow(n_channels=6, srate=BoardShim.get_sampling_rate(board_id))
+    pub_win = PublicWindow(
+        n_channels=config["eeg"]["n_visual_channels"],
+        srate=BoardShim.get_sampling_rate(board_id)
+    )
+    fullscreen = config["display"]["fullscreen"]
 
-    move_window_to_screen(user_win, user_screen, fullscreen=True)
-    move_window_to_screen(pub_win, pub_screen, fullscreen=True)
-
-    controller = Controller(board, board_id, user_win, pub_win)
-
+    move_window_to_screen(user_win, user_screen, fullscreen=fullscreen)
+    move_window_to_screen(pub_win, pub_screen, fullscreen=fullscreen)
+    controller = Controller(board, board_id, user_win, pub_win, config)    
+    
     try:
         app.exec()
     finally:
