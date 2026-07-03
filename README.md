@@ -14,9 +14,9 @@ This repository contains a real-time EEG-based demonstration designed for public
 
 
 
-\* A \*\*user-facing window\*\* with instructions and cognitive/relaxation tasks.
+\- A \*\*user-facing window\*\* with instructions and cognitive/relaxation tasks.
 
-\* A \*\*public-facing window\*\* with EEG signals, state scores, blink detection, signal quality estimation, and a simple visual feedback element.
+\- A \*\*public-facing window\*\* with EEG signals, state scores, blink detection, signal quality estimation, and a simple visual feedback element.
 
 
 
@@ -28,25 +28,25 @@ The current version is intended as a functional demo for showing basic concepts 
 
 
 
-\* Real-time EEG acquisition using MindRove WiFi.
+\- Real-time EEG acquisition using MindRove WiFi.
 
-\* Multi-channel EEG visualization.
+\- Multi-channel EEG visualization.
 
-\* Simple EEG score estimation:
+\- Simple EEG score estimation:
 
+&#x20; - Calm state based on alpha/beta ratio.
 
+&#x20; - Activation state based on beta activity.
 
-&#x20; \* Calm state based on alpha/beta ratio.
+&#x20; - Blink detection using peak amplitude.
 
-&#x20; \* Activation state based on beta activity.
+&#x20; - Signal quality heuristic based on standard deviation.
 
-&#x20; \* Blink detection using peak amplitude.
+\- Dual-screen interface for user instructions and public visualization.
 
-&#x20; \* Signal quality heuristic based on standard deviation.
+\- Interactive task stages for demonstration purposes.
 
-\* Dual-screen interface for user instructions and public visualization.
-
-\* Interactive task stages for demonstration purposes.
+\- Configurable demo parameters through a JSON file.
 
 
 
@@ -58,25 +58,25 @@ The current demo includes four stages:
 
 
 
-1\. \*\*REST\*\*
+1\. \*\*REST\*\*  
 
 &#x20;  The user remains still and looks at the center of the screen.
 
 
 
-2\. \*\*CALM / BREATHING\*\*
+2\. \*\*CALM / BREATHING\*\*  
 
 &#x20;  The user follows a slow breathing animation.
 
 
 
-3\. \*\*FOCUS / STROOP\*\*
+3\. \*\*FOCUS / STROOP\*\*  
 
 &#x20;  The user performs a Stroop-style cognitive task.
 
 
 
-4\. \*\*STRESS / RAPID COUNTING\*\*
+4\. \*\*STRESS / RAPID COUNTING\*\*  
 
 &#x20;  The user counts backwards quickly in steps of seven.
 
@@ -99,6 +99,8 @@ eeg-open-door-bci/
 │
 
 ├── configs/
+
+│   └── demo\_eeg.json
 
 │
 
@@ -138,6 +140,50 @@ python scripts/run\_eeg\_open\_door\_demo.py
 
 
 
+\## Configuration
+
+
+
+The demo parameters are defined in:
+
+
+
+```text
+
+configs/demo\_eeg.json
+
+```
+
+
+
+This configuration file includes:
+
+
+
+\- MindRove connection parameters.
+
+\- Stream buffer size.
+
+\- Fullscreen display mode.
+
+\- User and public screen indices.
+
+\- Number of EEG channels to visualize.
+
+\- EEG plotting window duration.
+
+\- EEG scoring window duration.
+
+\- Public visualization update interval.
+
+\- Demo stages and stage durations.
+
+
+
+The main script loads this configuration file by default, allowing the demo behavior to be adjusted without modifying the Python source code.
+
+
+
 \## Requirements
 
 
@@ -162,11 +208,11 @@ The MindRove SDK/package must be installed separately according to the device se
 
 
 
-\* MindRove EEG device.
+\- MindRove EEG device.
 
-\* Computer with WiFi connection.
+\- Computer with WiFi connection.
 
-\* Optional second monitor for separating the public and user interfaces.
+\- Optional second monitor for separating the public and user interfaces.
 
 
 
@@ -178,17 +224,15 @@ This repository contains an initial functional version of the EEG open-door demo
 
 
 
-\* Configuration files for experiment parameters.
+\- A demo mode without EEG hardware.
 
-\* A demo mode without EEG hardware.
+\- Modular code organization.
 
-\* Modular code organization.
+\- Improved documentation.
 
-\* Improved documentation.
+\- Example screenshots and diagrams.
 
-\* Example screenshots and diagrams.
-
-\* More robust EEG preprocessing and state estimation.
+\- More robust EEG preprocessing and state estimation.
 
 
 
@@ -197,6 +241,4 @@ This repository contains an initial functional version of the EEG open-door demo
 
 
 Initial functional demo version.
-
-
 
