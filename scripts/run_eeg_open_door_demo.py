@@ -475,8 +475,10 @@ class Controller(QtCore.QObject):
 
 
 def move_window_to_screen(window: QtWidgets.QWidget, screen: QtGui.QScreen, fullscreen=True):
-    geom = screen.geometry()  # QRect con coords globales del monitor
-    window.setGeometry(geom)  # coloca y dimensiona EXACTO en ese monitor
+    geom = screen.geometry()
+    window.setGeometry(geom)
+    window.move(geom.topLeft())
+
     if fullscreen:
         window.showFullScreen()
     else:
@@ -488,7 +490,7 @@ def main():
     params = MindRoveInputParams()
     params.wifi_connection = True
 
-    # Usa el board id que te funcione en tu setup
+    # Board ID for MindRove WiFi setup
     board_id = BoardIds.MINDROVE_WIFI_BOARD.value
 
     BoardShim.enable_dev_board_logger()
@@ -501,46 +503,27 @@ def main():
     app = QtWidgets.QApplication([])
 
     screens = app.screens()
-    screens = app.screens()
-    primary = app.primaryScreen()
+
+    print(f"Detected screens: {len(screens)}")
+    for i, screen in enumerate(screens):
+        print(f"Screen {i}: {screen.name()} | geometry={screen.geometry()}")
 
     if len(screens) < 2:
-        print("⚠️ Solo detecto 1 pantalla. Conecta 2 monitores en modo Extender.")
-        user_screen = primary
-        pub_screen = primary
+        print("Only one screen detected. Connect two monitors in Extend mode.")
+        user_screen = screens[0]
+        pub_screen = screens[0]
     else:
-        # Elige: público en la pantalla primaria y usuario en la otra
-        pub_screen = primary
-        user_screen = [s for s in screens if s != primary][0]
-    user_screen = screens[0]
-    pub_screen = screens[1] if len(screens) >= 2 else screens[0]
+        # Fixed screen assignment:
+        # - Screen 0: user instructions
+        # - Screen 1: public EEG visualization
+        user_screen = screens[0]
+        pub_screen = screens[1]
 
     user_win = UserWindow()
     pub_win = PublicWindow(n_channels=6, srate=BoardShim.get_sampling_rate(board_id))
 
-    # Place windows
-    move_window_to_screen(pub_win, pub_screen, fullscreen=True)   # público
-    move_window_to_screen(user_win, user_screen, fullscreen=True) # usuario
-
-    # --- mostrar señales (ventana principal) ---
-    # pub_win.showMaximized()   # o pub_win.show() si prefieres tamaño normal
-
-    # # --- mandar instrucciones a segunda pantalla como en tu main ---
-    # screens = QtWidgets.QApplication.screens()
-    # if len(screens) > 1:
-    #     second_screen_geom = screens[1].geometry()
-    #     user_win.setGeometry(second_screen_geom)
-
-    # user_win.showFullScreen()
-
-    user_win.showFullScreen()  # usuario se queda en la principal
-
-    screens = QtWidgets.QApplication.screens()
-    if len(screens) > 1:
-        pub_win.setGeometry(screens[1].geometry())
-    pub_win.showFullScreen()
-
-
+    move_window_to_screen(user_win, user_screen, fullscreen=True)
+    move_window_to_screen(pub_win, pub_screen, fullscreen=True)
 
     controller = Controller(board, board_id, user_win, pub_win)
 
