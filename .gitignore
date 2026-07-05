@@ -31,3 +31,5 @@ logs/
 # OS
 Thumbs.db
 .DS_Store
+
+configs/*.local.json

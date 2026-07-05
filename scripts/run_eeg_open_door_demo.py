@@ -2,6 +2,7 @@ import time
 import random
 import numpy as np
 
+import argparse
 import json
 from pathlib import Path
 
@@ -12,7 +13,21 @@ from mindrove.board_shim import BoardShim, MindRoveInputParams, BoardIds
 from mindrove.data_filter import DataFilter
 
 def load_config(config_path: str):
+    """
+    Load a JSON configuration file.
+
+    Relative paths are resolved from the repository root, so the script can be
+    executed from different working directories.
+    """
     path = Path(config_path)
+
+    if not path.is_absolute():
+        repo_root = Path(__file__).resolve().parents[1]
+        path = repo_root / path
+
+    if not path.exists():
+        raise FileNotFoundError(f"Configuration file not found: {path}")
+
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -468,7 +483,15 @@ def move_window_to_screen(window: QtWidgets.QWidget, screen: QtGui.QScreen, full
 
 
 def main():
-    config = load_config("configs/demo_eeg.json")
+    parser = argparse.ArgumentParser(description="EEG Open Door BCI Demo")
+    parser.add_argument(
+        "--config",
+        default="configs/demo_eeg.json",
+        help="Path to the JSON configuration file."
+    )
+    args = parser.parse_args()
+
+    config = load_config(args.config)
 
     global STAGES
     STAGES = config["stages"]
@@ -499,7 +522,7 @@ def main():
     pub_idx = config["display"]["public_screen_index"]
 
     if len(screens) < 2:
-        print("⚠️ Only one screen detected. Connect two monitors in Extend mode.")
+        print("Only one screen detected. Connect two monitors in Extend mode.")
         user_screen = screens[0]
         pub_screen = screens[0]
     else:
