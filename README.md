@@ -116,6 +116,10 @@ Additional technical documentation is available in the `docs/` folder:
 - `testing_checklist.md`: Basic validation checklist before running a demo.
 - `troubleshooting.md`: Common issues and possible solutions.
 
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
 ## Notes
 
 This repository contains an initial functional version of the EEG open-door demo. Future versions may include:
