@@ -106,6 +106,16 @@ The MindRove SDK/package must be installed separately according to the device se
 - Computer with WiFi connection.
 - Optional second monitor for separating the public and user interfaces.
 
+## Documentation
+
+Additional technical documentation is available in the `docs/` folder:
+
+- `setup_windows.md`: Windows setup and environment preparation.
+- `configuration.md`: JSON configuration parameters.
+- `acquisition.md`: EEG acquisition and signal scoring overview.
+- `testing_checklist.md`: Basic validation checklist before running a demo.
+- `troubleshooting.md`: Common issues and possible solutions.
+
 ## Notes
 
 This repository contains an initial functional version of the EEG open-door demo. Future versions may include:
